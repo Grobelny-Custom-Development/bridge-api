@@ -8,7 +8,7 @@ from bridge.model_utility import TimeStampAbstractMixin
 
 
 class GenericUserManager(BaseUserManager):
-    """Define a model manager for User model with no username field."""
+    """Define a model manager for User model with an email as username."""
 
     use_in_migrations = True
 
@@ -51,7 +51,10 @@ class GenericUser(AbstractGenericUser):
 
 
     # used to denote whether this is someone who can acces ORM directly
+    # both are needed by django
     is_admin = models.BooleanField(default=False, blank=True)
+    is_staff = models.BooleanField(default=False, blank=True)
+
     # if need to deactivate specific accounts
     is_active = models.BooleanField(default=True, blank=True)
     USERNAME_FIELD = 'email'
@@ -66,6 +69,19 @@ class GenericUser(AbstractGenericUser):
                                     null=True,)
 
     objects = GenericUserManager()
+    
+    def get_short_name(self):
+        # Return user's primary identifier
+        return self.email
+
+    def has_perm(self, perm, obj=None):
+        "Does the user have a specific permission?"
+        return True
+
+    def has_module_perms(self, app_label):
+        "Does the user have permissions to view the app `app_label`?"
+        return True
+
 
 # TODO::figure out what other info we need to store at the company level
 class Company(TimeStampAbstractMixin):
