@@ -30,8 +30,9 @@ class GenericUserManager(BaseUserManager):
 
     def create_superuser(self, email, password, **extra_fields):
         """Create and save a SuperUser with the given email and password."""
-        self.is_staff = True
-        self.is_admin = True
+        user = self.model(email=email)
+        user.is_staff = True
+        user.is_admin = True
         return self._create_user(email, password, **extra_fields)
 class AbstractGenericUser(AbstractBaseUser, TimeStampAbstractMixin):
 
