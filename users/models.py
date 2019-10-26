@@ -3,6 +3,7 @@ from django.contrib.auth.models import (
 )
 from django.db import models
 from uuid import uuid4
+from pytz import timezone
 
 from bridge.model_utility import TimeStampAbstractMixin
 
@@ -19,21 +20,25 @@ class GenericUserManager(BaseUserManager):
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
+        user.last_login = timezone.now()
         user.save(using=self._db)
         return user
 
     def create_user(self, email, password=None, **extra_fields):
         """Create and save a regular User with the given email and password."""
-        self.is_staff = False
-        self.is_admin = True
-        return self._create_user(email, password, **extra_fields)
+        user = self._create_user(email, password, **extra_fields)
+        user.is_staff = False
+        user.is_admin = True
+        user.save(using=self._db)
+        return user
 
     def create_superuser(self, email, password, **extra_fields):
         """Create and save a SuperUser with the given email and password."""
-        user = self.model(email=email)
+        user = self._create_user(email, password, **extra_fields)
         user.is_staff = True
         user.is_admin = True
-        return self._create_user(email, password, **extra_fields)
+        user.save(using=self._db)
+        return user
 class AbstractGenericUser(AbstractBaseUser, TimeStampAbstractMixin):
 
     class Meta:
