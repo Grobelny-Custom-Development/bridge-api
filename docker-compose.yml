@@ -11,7 +11,7 @@ services:
         - "6543:5432"
   web:
     build: .
-    command: python manage.py runserver 0.0.0.0:8000
+    command: python manage.py runserver 0.0.0.0:8000 --settings=bridge.local_settings
     volumes:
       - .:/code
     ports:

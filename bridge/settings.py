@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
 import os
+# Parse database configuration from $DATABASE_URL
+import dj_database_url
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -25,7 +27,8 @@ SECRET_KEY = 'e^5ouchh$c2g862r%ilepctx4pd*8dp$us3w82x_l&==rdmm53'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['bridge-api-dev.herokuapp.com']
+# TODO switch this when going to AWS
+ALLOWED_HOSTS = ['localhost', 'bridge-api-dev.herokuapp.com']
 
 
 # Application definition
@@ -51,6 +54,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'bridge.urls'
@@ -72,21 +76,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'bridge.wsgi.application'
-
-
-# Database
-# https://docs.djangoproject.com/en/1.11/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': 'supersecretpassword',
-        'HOST': 'db',
-        'PORT': 5432,
-    }
-}
 
 
 # Password validation
@@ -129,3 +118,6 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = '/static/'
 
 AUTH_USER_MODEL = 'users.GenericUser'
+
+#TODO:: change this when going to AWS
+DATABASES = {'default': dj_database_url.config(conn_max_age=600)}

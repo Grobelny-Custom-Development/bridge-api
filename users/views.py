@@ -63,7 +63,7 @@ class RegistrationView(APIView):
         )
 
         # log user in here
-        if user is not None:
+        if user:
             login(request, user)
             return Response({}, status=200)
         else:
