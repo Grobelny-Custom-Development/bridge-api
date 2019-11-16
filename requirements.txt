@@ -4,3 +4,7 @@ djangorestframework==3.10.3
 Markdown==3.1.1
 psycopg2>=2.7,<3.0
 pytz==2019.3
+
+
+# heroku configuration
+gunicorn==19.9.0
