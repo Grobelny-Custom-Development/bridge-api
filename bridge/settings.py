@@ -25,7 +25,7 @@ SECRET_KEY = 'e^5ouchh$c2g862r%ilepctx4pd*8dp$us3w82x_l&==rdmm53'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['https://bridge-api-dev.herokuapp.com/']
 
 
 # Application definition
