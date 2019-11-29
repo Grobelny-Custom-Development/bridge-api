@@ -45,6 +45,7 @@ class AbstractGenericUser(AbstractBaseUser, TimeStampAbstractMixin):
         abstract = True
 
 class GenericUser(AbstractGenericUser):
+    USERNAME_FIELD = 'email'
     email = models.EmailField(
         max_length=255,
         unique=True)
@@ -63,7 +64,7 @@ class GenericUser(AbstractGenericUser):
 
     # if need to deactivate specific accounts
     is_active = models.BooleanField(default=True, blank=True)
-    USERNAME_FIELD = 'email'
+    
     # could be used for 2FA at some point, useful to collect
     phone_number = models.CharField(max_length=10, null=True)
     # use for external applications/more secure identifier

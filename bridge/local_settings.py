@@ -13,3 +13,8 @@ DATABASES = {
         'PORT': 5432,
     }
 }
+
+CORS_ORIGIN_WHITELIST = [
+    'http://localhost:3006',
+    'http://localhost:8081'
+]
