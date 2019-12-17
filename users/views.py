@@ -42,18 +42,18 @@ class LogoutView(APIView):
 
 
 class RegistrationView(APIView):
-
+    permission_classes = (permissions.AllowAny,)
     def post(self, request):
         # TODO:: figure out how company fits in here - potentially url/subdomain
-        email = request.GET.get('email')
-        password = request.GET.get('password')
-        first_name = request.GET.get('first_name')
-        middle_name = request.GET.get('middle_name')
-        last_name = request.GET.get('last_name')
-        date_of_birth = request.GET.get('date_of_birth')
-        gender = request.GET.get('gender')
-        phone_number = request.GET.get('phone_number')
-
+        email = request.data.get('email')
+        password = request.data.get('password')
+        first_name = request.data.get('first_name')
+        middle_name = request.data.get('middle_name')
+        last_name = request.data.get('last_name')
+        date_of_birth = request.data.get('date_of_birth')
+        gender = request.data.get('gender')
+        phone_number = request.data.get('phone_number')
+        print(request.data)
         # TODO figure out if want to log users in right away or ask to verify email
         # / other actions
         user = GenericUser.objects.create_user(
@@ -66,18 +66,14 @@ class RegistrationView(APIView):
             gender=gender,
             phone_number=phone_number
         )
-
+        serializer = UserSerializerWithToken(user)
+        return Response(serializer.data, status=200)
         # log user in here
         if user:
             login(request, user)
             return Response({}, status=200)
         else:
             return Response({}, status=400)
-
-class TestRoute(APIView):
-    def get(self, request):
-
-        return Response({'message': 'hello'}, status=200)
 
 
 class UserRoute(APIView):

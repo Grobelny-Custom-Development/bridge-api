@@ -3,7 +3,7 @@ from django.contrib.auth.models import (
 )
 from django.db import models
 from uuid import uuid4
-from pytz import timezone
+import datetime
 
 from bridge.model_utility import TimeStampAbstractMixin
 
@@ -20,7 +20,7 @@ class GenericUserManager(BaseUserManager):
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
-        user.last_login = timezone.now()
+        user.last_login = datetime.datetime.now()
         user.save(using=self._db)
         return user
 
@@ -51,7 +51,7 @@ class GenericUser(AbstractGenericUser):
         unique=True)
 
     first_name = models.CharField(max_length=40)
-    middle_name = models.CharField(max_length=40)
+    middle_name = models.CharField(max_length=40, null=True)
     last_name = models.CharField(max_length=40)
     date_of_birth = models.DateTimeField(null=True, blank=True)
     gender = models.CharField(max_length=2,null=True, blank=True)
@@ -70,7 +70,7 @@ class GenericUser(AbstractGenericUser):
     # use for external applications/more secure identifier
     user_uuid = models.UUIDField(default=uuid4, editable=False)
     # TODO:: discuss delete policy here but would assume users stay intact
-    company_id = models.ForeignKey('Company',
+    company = models.ForeignKey('Company',
                                     models.SET_NULL,
                                     blank=True,
                                     null=True,)
@@ -98,5 +98,5 @@ class Company(TimeStampAbstractMixin):
     effective_start = models.DateTimeField(null=True, blank=True)
     # date that company stopped using bridge
     effective_end = models.DateTimeField(null=True, blank=True)
-
+    # external uuid 
     company_uuid = models.UUIDField(default=uuid4, editable=False)
