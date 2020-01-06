@@ -8,7 +8,6 @@ from bridge.model_utility import TimeStampAbstractMixin
 
 class Component(TimeStampAbstractMixin):
     name = models.CharField(max_length=255)
-    duration = models.DurationField()
     description = models.TextField(blank=True, null=True)
 
     # TODO:: ensure this is working properly
@@ -33,7 +32,7 @@ class MeetingTemplate(TimeStampAbstractMixin):
     description = models.CharField(max_length=255)
     company_id = models.PositiveIntegerField()
     public = models.BooleanField(default=False)
-    components = models.ManyToManyField(Component)
+    components = models.ManyToManyField(Component, through="MeetingComponent")
 
     # TODO:: figure out interval rules w/ Joe
     interval = models.CharField(choices=INTERVAL_CHOICES, max_length=5)
@@ -42,6 +41,11 @@ class MeetingTemplate(TimeStampAbstractMixin):
     template_uuid = models.UUIDField(default=uuid4, editable=False)
 
     # TODO:: declare duration field that will sum component duration
+class MeetingComponent(TimeStampAbstractMixin):
+    component = models.ForeignKey(Component, on_delete=models.CASCADE)
+    meeting_template = models.ForeignKey(MeetingTemplate, on_delete=models.CASCADE)
+    agenda_item =  models.CharField(max_length=255)
+    duration = models.DurationField()
 
 class MeetingStructure(TimeStampAbstractMixin):
     start_date = models.DateTimeField(blank=True, null=True)

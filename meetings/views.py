@@ -6,10 +6,11 @@ from django.contrib.auth import (
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
-
-from meetings.models import MeetingStructure, MeetingTemplate
-from meetings.serializers import MeetingActiveSerializer
 import uuid
+
+
+from meetings.models import MeetingStructure, MeetingTemplate, Component
+from meetings.serializers import MeetingActiveSerializer, ComponentSerializer
 
 
 
@@ -31,12 +32,13 @@ class MeetingRoute(APIView):
         template_uuid = uuid.uuid4()
 
         # properties that have to be filled out in Form
-        name = request.data.get('name')
-        description = request.data.get('description')
-        public = request.data.get('public')
-        recurring = request.data.get('recurring')
-        interval = request.data.get('interval')
-        start_date = request.data.get('start_date')
+        name = request.POST.get('name')
+        description = request.POST.get('description')
+        public = request.POST.get('public')
+        recurring = request.POST.get('recurring')
+        interval = request.POST.get('interval')
+        start_date = request.POST.get('start_date')
+        selected_components = request.POST.get('selected_components')
 
         template = MeetingTemplate.objects.create(
             created_by = host,
@@ -71,3 +73,9 @@ class MeetingActiveRoute(APIView):
         if request.user:
             active_meetings = MeetingStructure.objects.filter(host=request.user, end_date__isnull=True)
             return Response({'meetings': MeetingActiveSerializer(active_meetings, many=True).data}, status=200)
+
+class ComponentRoute(APIView):
+    def get(self, request):
+        if request.user:
+            components = Component.objects.all()
+            return Response({'components': ComponentSerializer(components, many=True).data}, status=200)

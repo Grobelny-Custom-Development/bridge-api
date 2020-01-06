@@ -45,15 +45,15 @@ class RegistrationView(APIView):
     permission_classes = (permissions.AllowAny,)
     def post(self, request):
         # TODO:: figure out how company fits in here - potentially url/subdomain
-        email = request.data.get('email')
-        password = request.data.get('password')
-        first_name = request.data.get('first_name')
-        middle_name = request.data.get('middle_name')
-        last_name = request.data.get('last_name')
-        date_of_birth = request.data.get('date_of_birth')
-        gender = request.data.get('gender')
-        phone_number = request.data.get('phone_number')
-        print(request.data)
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        first_name = request.POST.get('first_name')
+        middle_name = request.POST.get('middle_name')
+        last_name = request.POST.get('last_name')
+        date_of_birth = request.POST.get('date_of_birth')
+        gender = request.POST.get('gender')
+        phone_number = request.POST.get('phone_number')
+        print(request.POST)
         # TODO figure out if want to log users in right away or ask to verify email
         # / other actions
         user = GenericUser.objects.create_user(
