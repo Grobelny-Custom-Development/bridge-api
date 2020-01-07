@@ -156,3 +156,7 @@ AUTH_USER_MODEL = 'users.GenericUser'
 
 #TODO:: change this when going to AWS
 DATABASES = {'default': dj_database_url.config(conn_max_age=600)}
+
+CORS_ORIGIN_WHITELIST = [
+    'https://bridge-web-dev.herokuapp.com'
+]
