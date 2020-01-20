@@ -100,3 +100,14 @@ class Company(TimeStampAbstractMixin):
     effective_end = models.DateTimeField(null=True, blank=True)
     # external uuid 
     company_uuid = models.UUIDField(default=uuid4, editable=False)
+
+    def save(self, *args, **kwargs):
+        # if we haven't set the uuid then set it now as long as it's not already in the table
+        if not self.company_uuid:
+            uuid = uuid4()
+            while Company.objects.filter(company_uuid=uuid).exists():
+                uuid = uuid4()
+
+            self.uuid = uuid
+        super(Company, self).save(*args, **kwargs)
+

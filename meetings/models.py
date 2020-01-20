@@ -40,6 +40,16 @@ class MeetingTemplate(TimeStampAbstractMixin):
 
     template_uuid = models.UUIDField(default=uuid4, editable=False)
 
+    def save(self, *args, **kwargs):
+        # if we haven't set the uuid then set it now as long as it's not already in the table
+        if not self.template_uuid:
+            uuid = uuid4()
+            while MeetingTemplate.objects.filter(template_uuid=uuid).exists():
+                uuid = uuid4()
+
+            self.uuid = uuid
+        super(MeetingTemplate, self).save(*args, **kwargs)
+
     # TODO:: declare duration field that will sum component duration
 class MeetingComponent(TimeStampAbstractMixin):
     component = models.ForeignKey(Component, on_delete=models.CASCADE)
@@ -55,6 +65,16 @@ class MeetingStructure(TimeStampAbstractMixin):
     host = models.ForeignKey(GenericUser, related_name='host')
     company_id = models.PositiveIntegerField()
     participants = models.ManyToManyField(GenericUser)
+
+    def save(self, *args, **kwargs):
+        # if we haven't set the uuid then set it now as long as it's not already in the table
+        if not self.meeting_uuid:
+            uuid = uuid4()
+            while MeetingStructure.objects.filter(meeting_uuid=uuid).exists():
+                uuid = uuid4()
+
+            self.uuid = uuid
+        super(MeetingStructure, self).save(*args, **kwargs)
 
 class Cards(TimeStampAbstractMixin):
     created_by = models.ForeignKey(GenericUser)

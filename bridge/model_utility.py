@@ -19,7 +19,7 @@ class TimeStampAbstractMixin(models.Model):
 
     def update_timestamps(self):
         # get now as UTC
-        utc_now = TimeHelper.get_uct_now_datetime()
+        utc_now = TimeHelper.get_utc_now_datetime()
 
         # if we have never been saved, then set the creation_timestamp to now(UTC)
         if not self.creation_timestamp:

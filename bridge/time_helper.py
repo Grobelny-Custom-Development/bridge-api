@@ -11,7 +11,7 @@ class TimeHelper:
         pass
 
     @classmethod
-    def get_uct_now_datetime(cls):
+    def get_utc_now_datetime(cls):
         return datetime.datetime.utcnow().replace(tzinfo=UTC)
 
     @classmethod

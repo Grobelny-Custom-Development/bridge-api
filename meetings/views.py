@@ -8,12 +8,12 @@ from rest_framework.views import APIView
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 import uuid
-
+import ast
 
 from meetings.models import MeetingStructure, MeetingTemplate, MeetingComponent, Component
 from meetings.serializers import MeetingActiveSerializer, ComponentSerializer, MeetingActiveComponentsSerializer, MeetingTemplateSerializer
 
-import ast
+from meetings.meeting_creation_helper import create_meeting_template_components
 
 
 
@@ -27,51 +27,18 @@ class MeetingRoute(APIView):
         # properties that will be derived from user
         host = request.user
 
-        # Company will come here 
-        company = host.company
-        
-        # generate UUID
-        meeting_uuid = uuid.uuid4()
-        template_uuid = uuid.uuid4()
-
         # properties that have to be filled out in Form
         name = request.POST.get('name')
         description = request.POST.get('description')
-        public = request.POST.get('public')
-        recurring = request.POST.get('recurring')
+        public = request.POST.get('public') == "true"
+        recurring = request.POST.get('recurring') == "true"
         interval = request.POST.get('interval')
         start_date = request.POST.get('start_date')
         selected_components = ast.literal_eval(request.POST.get('selected_components'))
-        print(selected_components)
 
-        template = MeetingTemplate.objects.create(
-            created_by = host,
-            name = name,
-            description = 'Hello',
-            company_id = company.id,
-            public = True,
-            interval = interval,
-            template_uuid = template_uuid
-        )
-
-        # TODO:: declare duration field that will sum component duration
-
-        meeting_structure = MeetingStructure.objects.create(
-            start_date = start_date,
-            meeting_template = template,
-            meeting_uuid = meeting_uuid,
-            host = host,
-            company_id = company.id
-        )
-        for selected_component in selected_components:
-            MeetingComponent.objects.create(
-                component_id=selected_component['id'],
-                meeting_template=template,
-                duration=selected_component['duration'],
-                agenda_item=selected_component['agenda_item']
-            )
+        meeting_uuid = create_meeting_template_components(host, name, description, recurring, interval, public, start_date, selected_components)
             
-        return Response({'meeting_uuid':meeting_structure.meeting_uuid }, status=200)
+        return Response({'meeting_uuid': meeting_uuid }, status=200)
 
 class CardRoute(APIView):
     def get(self, request):
@@ -102,5 +69,5 @@ class ComponentRoute(APIView):
 class TemplateActiveRoute(APIView):
     def get(self, request):
         if request.user:
-            meeting_templates = MeetingTemplate.objects.all()
+            meeting_templates = MeetingTemplate.objects.filter(public=True)
             return Response({'templates': MeetingTemplateSerializer(meeting_templates, many=True).data}, status=200)
