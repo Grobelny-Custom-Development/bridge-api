@@ -12,5 +12,6 @@ urlpatterns = [
     url(r'^structure/create/', MeetingRoute.as_view()),
     url(r'^components/', ComponentRoute.as_view()),
     url(r'^card/create/', CardRoute.as_view()),
-    url(r'^active/', MeetingActiveRoute.as_view())
+    url(r'^active/$', MeetingActiveRoute.as_view({'get': 'get_active_list'})),
+    url(r'^active/preview/$', MeetingActiveRoute.as_view({'get': 'get_active_single'}))
 ]
