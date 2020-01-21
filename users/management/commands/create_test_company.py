@@ -2,6 +2,7 @@
 from __future__ import absolute_import, division, print_function
 
 from django.core.management.base import BaseCommand
+from bridge.time_helper import TimeHelper
 from users.models import Company
 
 

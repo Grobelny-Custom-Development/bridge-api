@@ -28,14 +28,14 @@ class GenericUserManager(BaseUserManager):
         """Create and save a regular User with the given email and password."""
         user = self._create_user(email, password, **extra_fields)
         user.is_staff = False
-        user.is_admin = True
+        user.is_admin = False
         user.save(using=self._db)
         return user
 
     def create_superuser(self, email, password, **extra_fields):
         """Create and save a SuperUser with the given email and password."""
         user = self._create_user(email, password, **extra_fields)
-        user.is_staff = True
+        user.is_staff = False
         user.is_admin = True
         user.save(using=self._db)
         return user

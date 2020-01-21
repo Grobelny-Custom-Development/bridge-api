@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from meetings.models import MeetingStructure, MeetingComponent, Component, MeetingTemplate
+from meetings.models import MeetingStructure, MeetingComponent, Component, MeetingTemplate, Cards
 
 class MeetingTemplateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -34,3 +34,8 @@ class ComponentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Component
         fields = ('name', 'description', 'id')
+
+class CardSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Cards
+        fields = ('content',)

@@ -10,8 +10,12 @@ from rest_framework.permissions import IsAuthenticated
 import uuid
 import ast
 
-from meetings.models import MeetingStructure, MeetingTemplate, MeetingComponent, Component
-from meetings.serializers import MeetingActiveSerializer, ComponentSerializer, MeetingActiveComponentsSerializer, MeetingTemplateSerializer
+from meetings.models import MeetingStructure, MeetingTemplate, MeetingComponent, Component, Cards
+from meetings.serializers import (
+    MeetingActiveSerializer, ComponentSerializer, 
+    MeetingActiveComponentsSerializer, MeetingTemplateSerializer,
+    CardSerializer
+)
 
 from meetings.meeting_creation_helper import create_meeting_template_components
 
@@ -71,3 +75,27 @@ class TemplateActiveRoute(APIView):
         if request.user:
             meeting_templates = MeetingTemplate.objects.filter(public=True)
             return Response({'templates': MeetingTemplateSerializer(meeting_templates, many=True).data}, status=200)
+
+class BrainstormRoute(viewsets.ViewSet):
+    def get(self, request):
+        meeting_uuid = request.GET.get('meeting_uuid')
+        # TODO:: add brainstorm filtering here
+        current_cards = Cards.objects.filter(meeting__meeting_uuid=meeting_uuid, created_by=request.user)
+        print(current_cards)
+        return Response({'brainstorm_cards': CardSerializer(current_cards, many=True).data}, status=200)
+
+
+
+    def post(self, request):
+        meeting_uuid = request.POST.get('meeting_uuid')
+        content = request.POST.get('content')
+        meeting = MeetingStructure.objects.get(meeting_uuid=meeting_uuid)
+        # replace this with related lookup on brainstorm from meeting
+        component = MeetingComponent.objects.get(component__name='Brainstorm', meeting_template=meeting.meeting_template)
+        current_card = Cards.objects.create(
+            content=content,
+            meeting=meeting,
+            component=component,
+            created_by=request.user
+        )
+        return Response({'brainstorm_card': CardSerializer(current_card).data}, status=200)

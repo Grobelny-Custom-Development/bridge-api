@@ -80,5 +80,6 @@ class Cards(TimeStampAbstractMixin):
     created_by = models.ForeignKey(GenericUser)
     content = models.TextField(blank=True, null=True)
     meeting = models.ForeignKey(MeetingStructure)
+    component = models.ForeignKey(MeetingComponent)
     # set by meeting host
     active = models.BooleanField(default=True)

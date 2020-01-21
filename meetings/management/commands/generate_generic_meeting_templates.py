@@ -1,8 +1,10 @@
 from __future__ import absolute_import, division, print_function
-
+from datetime import timedelta
 from django.core.management.base import BaseCommand
+from bridge.time_helper import TimeHelper
 from meetings.models import MeetingTemplate, Component, MeetingComponent
 from meetings.meeting_creation_helper import create_meeting_template_components
+from users.models import GenericUser
 
 
 class Command(BaseCommand):
@@ -11,9 +13,22 @@ class Command(BaseCommand):
         print(self.generate_generic_meeting_templates())
     def generate_generic_meeting_templates(self):
         baseline_names = ['Sprint Planning', 'Sprint Review', 'Stand Up', 'Sprint Retrospective']
-        baseline_descriptions = ['Brainstorming for groups', 'Forced Ranking for groups', 'Grouping for groups', 'Bucketing for groups', 'Prioritization for groups']
+        baseline_descriptions = ['Sprint Planning for groups', 'Forced Ranking for groups', 'Grouping for groups', 'Bucketing for groups', 'Prioritization for groups']
+        host = GenericUser.objects.get(email='sebastiangrobelny15@gmail.com')
+        selected_components = list(Component.objects.values())
+        print(selected_components)
+        for count, selected_component in enumerate(selected_components):
+            
+            selected_component['agenda_item'] = 'Agenda Item {}'.format(count)
+            selected_component['duration'] = timedelta(minutes=count)
 
-        selected_compoonents = Components.objects.all()
+            # replace
+            selected_components[count] = selected_component
+
+        start_date = TimeHelper.get_utc_now_datetime()
+        recurring = True
+        interval = 'Week'
+        public = True
         
         # TODO:: ensure this is working properly
         for name,description in zip(baseline_names, baseline_descriptions):
