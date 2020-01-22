@@ -33,4 +33,4 @@ class Command(BaseCommand):
                             help="This user's password, default password1.")
 
     def handle(self, *args, **options):
-        data = self.create_admin_user(email=options['email'], gender=options['gender'], password=options['password'])
+        data = self.create_bridge_admin_users(email=options['email'], gender=options['gender'], password=options['password'])
