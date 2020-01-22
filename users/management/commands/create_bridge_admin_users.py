@@ -11,7 +11,7 @@ class Command(BaseCommand):
         emails = [ 'sebastiangrobelny15@gmail.com', 'jmalucchi@gmail.com', 'm.briceno09@gmail.com']
         passwords = [ 'test1234', 'test1234', 'test1234']
         company_id = 1
-        for emails, passwords in zip(emails, passwords):
+        for email, password in zip(emails, passwords):
             admin_user = GenericUser.objects.create_superuser(
                 email=email,
                 first_name=first_name,
