@@ -14,23 +14,24 @@ class Command(BaseCommand):
     def generate_generic_meeting_templates(self):
         baseline_names = ['Sprint Planning', 'Sprint Review', 'Stand Up', 'Sprint Retrospective']
         baseline_descriptions = ['Sprint Planning for groups', 'Forced Ranking for groups', 'Grouping for groups', 'Bucketing for groups', 'Prioritization for groups']
-        host = GenericUser.objects.get(email='sebastiangrobelny15@gmail.com')
+        hosts = GenericUser.objects.all()
         selected_components = list(Component.objects.values())
         print(selected_components)
-        for count, selected_component in enumerate(selected_components):
+        for host in hosts:
+            for count, selected_component in enumerate(selected_components):
+                
+                selected_component['agenda_item'] = 'Agenda Item {}'.format(count)
+                selected_component['duration'] = timedelta(minutes=count)
+
+                # replace
+                selected_components[count] = selected_component
+
+            start_date = TimeHelper.get_utc_now_datetime()
+            recurring = True
+            interval = 'Week'
+            public = True
             
-            selected_component['agenda_item'] = 'Agenda Item {}'.format(count)
-            selected_component['duration'] = timedelta(minutes=count)
-
-            # replace
-            selected_components[count] = selected_component
-
-        start_date = TimeHelper.get_utc_now_datetime()
-        recurring = True
-        interval = 'Week'
-        public = True
-        
-        # TODO:: ensure this is working properly
-        for name,description in zip(baseline_names, baseline_descriptions):
-            create_meeting_template_components(host, name, description, recurring, interval, public, start_date, selected_components)
+            # TODO:: ensure this is working properly
+            for name,description in zip(baseline_names, baseline_descriptions):
+                create_meeting_template_components(host, name, description, recurring, interval, public, start_date, selected_components)
         print('Created baseline meeting templates.')
