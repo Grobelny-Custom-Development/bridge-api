@@ -38,4 +38,4 @@ class ComponentSerializer(serializers.ModelSerializer):
 class CardSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cards
-        fields = ('content',)
+        fields = ('id', 'content',)
