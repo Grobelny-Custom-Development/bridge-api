@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     # bridge applications
     'users',
     'meetings',
+    'activity',
     # react necessities
     'corsheaders',
 ]
@@ -156,6 +157,7 @@ AUTH_USER_MODEL = 'users.GenericUser'
 
 #TODO:: change this when going to AWS
 DATABASES = {'default': dj_database_url.config(conn_max_age=600)}
+DATABASES['default']['ENGINE'] = 'django.db.backends.postgresql'
 
 CORS_ORIGIN_WHITELIST = [
     'https://bridge-web-dev.herokuapp.com'

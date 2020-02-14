@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function
 from datetime import timedelta
 from django.core.management.base import BaseCommand
 from bridge.time_helper import TimeHelper
-from meetings.models import MeetingTemplate, Component, MeetingComponent
+from meetings.models import MeetingTemplate, Component, ACTIVITY_CHOICES
 from meetings.meeting_creation_helper import create_meeting_template_components
 from users.models import GenericUser
 
@@ -14,18 +14,20 @@ class Command(BaseCommand):
     def generate_generic_meeting_templates(self):
         baseline_names = ['Sprint Planning', 'Sprint Review', 'Stand Up', 'Sprint Retrospective']
         baseline_descriptions = ['Sprint Planning for groups', 'Forced Ranking for groups', 'Grouping for groups', 'Bucketing for groups', 'Prioritization for groups']
+        baseline_component_names = ['Brainstorm', 'Forced Rank', 'Grouping', 'Bucketing', 'Prioritization']
+        baseline_component_descriptions = ['Brainstorming for groups', 'Forced Ranking for groups', 'Grouping for groups', 'Bucketing for groups', 'Prioritization for groups']
         hosts = GenericUser.objects.all()
-        selected_components = list(Component.objects.values())
-        print(selected_components)
         for host in hosts:
-            for count, selected_component in enumerate(selected_components):
-                
-                selected_component['agenda_item'] = 'Agenda Item {}'.format(count)
-                selected_component['duration'] = timedelta(minutes=count)
-
-                # replace
-                selected_components[count] = selected_component
-
+            selected_components = []
+            for name, description, activity_choice in zip(baseline_component_names, baseline_component_descriptions, ACTIVITY_CHOICES):
+                selected_component = {
+                    'name' : name,
+                    'description' : description,
+                    'activity_type' : activity_choice[0],
+                    'duration' : timedelta(minutes=10),
+                    'agenda_item' : name
+                }
+                selected_components.append(selected_component)
             start_date = TimeHelper.get_utc_now_datetime()
             recurring = True
             interval = 'Week'

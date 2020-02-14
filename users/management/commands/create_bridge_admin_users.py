@@ -20,8 +20,6 @@ class Command(BaseCommand):
                 company_id=company_id,
                 gender=gender
             )
-            print("Your admin user is:", data['email'], ':', data['first_name'], data['last_name'])
-            print("Your admin id is:", data['id'])
 
 
     def add_arguments(self, parser):

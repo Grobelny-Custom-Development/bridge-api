@@ -6,14 +6,20 @@ from uuid import uuid4
 from users.models import GenericUser, Company
 from bridge.model_utility import TimeStampAbstractMixin
 
-class Component(TimeStampAbstractMixin):
-    name = models.CharField(max_length=255)
-    description = models.TextField(blank=True, null=True)
+BRAINSTORM = 'brainstormactivity'
+FORCED_RANK = 'forcedrankactivity'
+GROUPING = 'groupingactivity'
+BUCKETING = 'bucketingactivity'
+PRIORITIZATION = 'prioritizationactivity'
 
-    # TODO:: ensure this is working properly
-    content_type = models.ForeignKey(ContentType, on_delete=models.SET_NULL, null=True)
-    object_id = models.PositiveIntegerField()
-    content_object = GenericForeignKey('content_type', 'object_id')
+ACTIVITY_CHOICES = (
+    (BRAINSTORM, "Brainstorm Activity"),
+    (FORCED_RANK, "Forced Rank Activity"),
+    (GROUPING, "Grouping Activity"),
+    (BUCKETING, "Bucketing Activity"),
+    (PRIORITIZATION, "Prioritization Activity"),
+)
+
 
 class MeetingTemplate(TimeStampAbstractMixin):
     DAY = 'day'
@@ -32,7 +38,6 @@ class MeetingTemplate(TimeStampAbstractMixin):
     description = models.CharField(max_length=255)
     company_id = models.PositiveIntegerField()
     public = models.BooleanField(default=False)
-    components = models.ManyToManyField(Component, through="MeetingComponent")
 
     # TODO:: figure out interval rules w/ Joe
     interval = models.CharField(choices=INTERVAL_CHOICES, max_length=5)
@@ -51,11 +56,6 @@ class MeetingTemplate(TimeStampAbstractMixin):
         super(MeetingTemplate, self).save(*args, **kwargs)
 
     # TODO:: declare duration field that will sum component duration
-class MeetingComponent(TimeStampAbstractMixin):
-    component = models.ForeignKey(Component, on_delete=models.CASCADE)
-    meeting_template = models.ForeignKey(MeetingTemplate, on_delete=models.CASCADE)
-    agenda_item =  models.CharField(max_length=255)
-    duration = models.DurationField()
 
 class MeetingStructure(TimeStampAbstractMixin):
     start_date = models.DateTimeField(blank=True, null=True)
@@ -76,10 +76,10 @@ class MeetingStructure(TimeStampAbstractMixin):
             self.uuid = uuid
         super(MeetingStructure, self).save(*args, **kwargs)
 
-class Cards(TimeStampAbstractMixin):
-    created_by = models.ForeignKey(GenericUser)
-    content = models.TextField(blank=True, null=True)
-    meeting = models.ForeignKey(MeetingStructure)
-    component = models.ForeignKey(MeetingComponent)
-    # set by meeting host
-    active = models.BooleanField(default=True)
+class Component(TimeStampAbstractMixin):
+    name = models.CharField(max_length=255)
+    acitvity_type = models.CharField(choices=ACTIVITY_CHOICES, max_length=100)
+    description = models.TextField(blank=True, null=True)
+    meeting_template = models.ForeignKey(MeetingTemplate, on_delete=models.CASCADE)
+    agenda_item =  models.CharField(max_length=255)
+    duration = models.DurationField()
