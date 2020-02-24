@@ -12,7 +12,8 @@ import ast
 
 from meetings.models import ( 
     MeetingStructure, MeetingTemplate, Component, 
-    BRAINSTORM, FORCED_RANK, GROUPING, BUCKETING, PRIORITIZATION
+    BRAINSTORM, FORCED_RANK, GROUPING, BUCKETING, PRIORITIZATION,
+    ACTIVITY_CHOICES
 )
 
 from activity.models import (
@@ -80,7 +81,6 @@ class MeetingActiveRoute(viewsets.ViewSet):
     def get_active_list(self, request):
         if request.user:
             active_meetings = MeetingStructure.objects.filter(host=request.user, end_date__isnull=True)
-            print(active_meetings)
             return Response({'meetings': MeetingActiveSerializer(active_meetings, many=True).data}, status=200)
 
     def get_active_single(self, request):
@@ -93,8 +93,10 @@ class MeetingActiveRoute(viewsets.ViewSet):
 class ComponentRoute(APIView):
     def get(self, request):
         if request.user:
-            components = Component.objects.all()
-            return Response({'components': ComponentSerializer(components, many=True).data}, status=200)
+            components = []
+            for count, component in enumerate(ACTIVITY_CHOICES):
+                components.append({ 'id': count, 'name': component[1]})
+            return Response({'components': components}, status=200)
 
 class TemplateActiveRoute(APIView):
     def get(self, request):
