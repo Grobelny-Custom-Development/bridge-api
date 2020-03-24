@@ -3,15 +3,12 @@ from meetings.models import (
     BRAINSTORM, FORCED_RANK, GROUPING, BUCKETING, PRIORITIZATION
 )
 
-from activity.models import (
-    BrainstormActivity, ForcedRankActivity, GroupingActivity, BucketingActivity,
-    PrioritizationActivity
-)
+from activity.models import ActivityBase
+from users.models import GenericUser
 
 
 
-
-def create_meeting_template_components(host, name, description, recurring, interval, public, start_date, selected_components):
+def create_meeting_template_components(host, name, description, recurring, interval, public, start_date, selected_components, participants):
         # Company will come here 
         company = host.company
         template = MeetingTemplate.objects.create(
@@ -36,22 +33,12 @@ def create_meeting_template_components(host, name, description, recurring, inter
                 meeting_template=template,
                 name=selected_component['name'],
                 description=selected_component['description'],
-                acitvity_type= selected_component['activity_type'],
+                activity_type= selected_component['activity_type'],
                 duration=selected_component['duration'],
                 agenda_item=selected_component['agenda_item']
             )
-            if selected_component['activity_type'] == BRAINSTORM:
-                BrainstormActivity.objects.create(meeting_structure=meeting_structure, component=component)
-            elif selected_component['activity_type'] == FORCED_RANK:
-                ForcedRankActivity.objects.create(meeting_structure=meeting_structure, component=component)
-
-            elif selected_component['activity_type'] == GROUPING:
-                GroupingActivity.objects.create(meeting_structure=meeting_structure, component=component)
-            
-            elif selected_component['activity_type'] == BUCKETING:
-                BucketingActivity.objects.create(meeting_structure=meeting_structure, component=component)
-            
-            elif selected_component['activity_type'] == PRIORITIZATION:
-                PrioritizationActivity.objects.create(meeting_structure=meeting_structure, component=component)
+            ActivityBase.objects.create(meeting_structure=meeting_structure, component=component)
+        for participant in participants:
+            meeting_structure.participants.add(GenericUser.objects.get(id=participant['id']))
 
         return meeting_structure.meeting_uuid

@@ -17,12 +17,15 @@ from meetings.models import (
 )
 
 from activity.models import (
-    Cards, PrioritizationActivity, BrainstormActivity,
-    PrioritizedCards, BrainstormCards
+    Cards, ActivityBase,
+    PrioritizedCards
 )
+from users.serializers import UserSerializer
 from meetings.serializers import (
     MeetingActiveSerializer, ComponentSerializer, 
-    MeetingActiveComponentsSerializer, MeetingTemplateSerializer
+    MeetingActiveComponentsSerializer, 
+    ActivitySerializer,
+    MeetingTemplateSerializer
 )
 
 from activity.serializers import (
@@ -32,7 +35,7 @@ from activity.serializers import (
 from meetings.meeting_creation_helper import create_meeting_template_components
 
 
-
+# TODO:: consolidate card calls
 class MeetingRoute(APIView):
     permission_classes = (IsAuthenticated,) 
     # authentication_classes = (TokenAuthentication,) 
@@ -58,20 +61,20 @@ class MeetingRoute(APIView):
 
 class CardRoute(viewsets.ViewSet):
     def get_user_cards(self, request):
-        meeting_uuid = request.GET.get('meeting_uuid')
-        # TODO:: figure out how to reference meetings on these
-        meeting = MeetingStructure.objects.get(meeting_uuid=meeting_uuid)
-        brainstorm_activity = BrainstormActivity.objects.filter(meeting_structure=meeting).first()
-        if brainstorm_activity:
-            brainstorm_cards = BrainstormCards.objects.filter(brainstorm_activity=brainstorm_activity, created_by=request.user).values_list('card_id', flat=True)
-            current_cards = Cards.objects.filter(meeting__meeting_uuid=meeting_uuid, id__in=brainstorm_cards)
-            return Response({'cards': CardSerializer(current_cards, many=True).data, 'brainstorm_activity_id': brainstorm_activity.id}, status=200)
+        activity_uuid = request.GET.get('activity_uuid')
+        activity = ActivityBase.objects.get(activity_uuid=activity_uuid)
+        if activity:
+            current_cards = Cards.objects.filter(activity_created_by=activity, user_created=request.user)
+            return Response({'cards': CardSerializer(current_cards, many=True).data, 'brainstorm_activity_id': activity.id}, status=200)
         else:
             return Response(status=400)
 
     def get_active_cards(self, request):
-        meeting_uuid = request.GET.get('meeting_uuid')
-        current_cards = Cards.objects.filter(meeting__meeting_uuid=meeting_uuid, active=True)
+        activity_uuid = request.GET.get('activity_uuid')
+
+        # TODO:: change this when changing how data gets input into activities
+        activity = ActivityBase.objects.get(activity_uuid=activity_uuid)
+        current_cards = Cards.objects.filter(activity_created_by=activity.data_input, active=True)
         return Response({'cards': CardSerializer(current_cards, many=True).data}, status=200)
 
     def post(self, request):
@@ -87,15 +90,21 @@ class MeetingActiveRoute(viewsets.ViewSet):
         if request.user:
             meeting_uuid = request.GET.get('meeting_uuid')
             active_meeting = MeetingStructure.objects.get(meeting_uuid=meeting_uuid)
-            
-            return Response({'meeting': MeetingActiveComponentsSerializer(active_meeting).data}, status=200)
+            components =  Component.objects.filter(meeting_template=active_meeting.meeting_template)
+            participants = active_meeting.participants
+            response_data = {
+                                'meeting': MeetingActiveSerializer(active_meeting).data, 
+                                'activities': ComponentSerializer(components,context={'meeting_structure': active_meeting }, many=True).data, 
+                                'participants': UserSerializer(participants, many=True).data
+                            }
+            return Response(response_data, status=200)
 
 class ComponentRoute(APIView):
     def get(self, request):
         if request.user:
             components = []
             for count, component in enumerate(ACTIVITY_CHOICES):
-                components.append({ 'id': count, 'name': component[1]})
+                components.append({ 'id': count, 'name': component[1], 'activity_type': component[0]})
             return Response({'components': components}, status=200)
 
 class TemplateActiveRoute(APIView):
@@ -106,36 +115,29 @@ class TemplateActiveRoute(APIView):
 
 class BrainstormRoute(viewsets.ViewSet):
     def post(self, request):
-        meeting_uuid = request.POST.get('meeting_uuid')
+        activity_uuid = request.POST.get('activity_uuid') 
         content = request.POST.get('content')
-
-        meeting = MeetingStructure.objects.get(meeting_uuid=meeting_uuid)
-        brainstorm_activity = BrainstormActivity.objects.filter(meeting_structure=meeting).first()
-        if brainstorm_activity:
-            card = Cards.objects.create(
-                content=content,
-                meeting=meeting
-            )
-            BrainstormCards.objects.create(
-                card=card,
-                brainstorm_activity=brainstorm_activity,
-                created_by=request.user
-            )
-            brainstorm_cards = BrainstormCards.objects.filter(brainstorm_activity=brainstorm_activity, created_by=request.user).values_list('card_id', flat=True)
-            current_cards = Cards.objects.filter(meeting__meeting_uuid=meeting_uuid, id__in=brainstorm_cards)
-            return Response({'brainstorm_cards': CardSerializer(current_cards, many=True).data}, status=200)
+        activity = ActivityBase.objects.get(activity_uuid=activity_uuid)
+        card = Cards.objects.create(
+            content=content,
+            meeting=activity.meeting_structure,
+            activity_created_by=activity,
+            user_created=request.user
+        )
+        current_cards = Cards.objects.filter(activity_created_by=activity, user_created=request.user)
+        return Response({'brainstorm_cards': CardSerializer(current_cards, many=True).data}, status=200)
 
 
 class PrioritizationRoute(viewsets.ViewSet):
     def get(self, request):
-        meeting_uuid = request.GET.get('meeting_uuid')
-        current_cards = Cards.objects.filter(meeting__meeting_uuid=meeting_uuid, active=True)
+        activity_uuid = request.GET.get('activity_uuid')
+        activity = ActivityBase.objects.get(activity_uuid=activity_uuid)
+        current_cards = Cards.objects.filter(activity_created_by=activity.data_input, active=True)
         return Response({'brainstorm_cards': CardSerializer(current_cards, many=True).data}, status=200)
     
     def post(self, request):
-        meeting_uuid = request.data.get('meeting_uuid')
-        meeting = MeetingStructure.objects.get(meeting_uuid=meeting_uuid)
-        prioritization_activity = PrioritizationActivity.objects.get(meeting_structure=meeting)
+        activity_uuid = request.data.get('activity_uuid')
+        prioritization_activity = ActivityBase.objects.get(activity_uuid=activity_uuid)
         if prioritization_activity:
             prioritized_cards = request.data.get('prioritized_cards')
 
@@ -151,15 +153,14 @@ class PrioritizationRoute(viewsets.ViewSet):
 
 class ForcedRankRoute(viewsets.ViewSet):
     def get(self, request):
-        meeting_uuid = request.GET.get('meeting_uuid')
-        # all active cards
-        current_cards = Cards.objects.filter(meeting__meeting_uuid=meeting_uuid)
+        activity_uuid = request.GET.get('activity_uuid')
+        activity = ActivityBase.objects.get(activity_uuid=activity_uuid)
+        current_cards = Cards.objects.filter(activity_created_by=activity.data_input, active=True)
         return Response({'cards': CardSerializer(current_cards, many=True).data}, status=200)
     
     def post(self, request):
-        meeting_uuid = request.data.get('meeting_uuid')
-        meeting = MeetingStructure.objects.get(meeting_uuid=meeting_uuid)
-        prioritization_activity = PrioritizationActivity.objects.get(meeting_structure=meeting)
+        activity_uuid = request.data.get('activity_uuid')
+        prioritization_activity = ActivityBase.objects.get(activity_uuid=activity_uuid)
         if prioritization_activity:
             prioritized_cards = request.data.get('prioritized_cards')
 

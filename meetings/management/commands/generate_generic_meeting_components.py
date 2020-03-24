@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function
 from datetime import timedelta
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
-from meetings.models import Component, ACTIVITY_CHOICES
+from meetings.models import Component, ACTIVITY_CHOICES, BRAINSTORM
 
 
 class Command(BaseCommand):
@@ -18,12 +18,17 @@ class Command(BaseCommand):
         # content_type
         # object_id
         for name, description, activity_choice in zip(baseline_names, baseline_descriptions, ACTIVITY_CHOICES):
-            Component.objects.create(
+            component = Component.objects.create(
                 name=name,
                 description=description,
-                acitvity_type =activity_choice,
+                activity_type =activity_choice,
                 duration = timedelta(minutes=10),
                 agenda_item=name
             )
+
+            # data comes from the brainstorming activity for all these
+            if component.activity_type != BRAINSTORM:
+                component.data_input = Component.objects.get(activity_type=BRAINSTORM)
+                component.save(update_fields=["data_input"]) 
         print('Created baseline components.')
         

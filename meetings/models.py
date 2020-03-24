@@ -6,18 +6,18 @@ from uuid import uuid4
 from users.models import GenericUser, Company
 from bridge.model_utility import TimeStampAbstractMixin
 
-BRAINSTORM = 'brainstormactivity'
-FORCED_RANK = 'forcedrankactivity'
-GROUPING = 'groupingactivity'
-BUCKETING = 'bucketingactivity'
-PRIORITIZATION = 'prioritizationactivity'
+BRAINSTORM = 'brainstorm'
+FORCED_RANK = 'forcedrank'
+GROUPING = 'grouping'
+BUCKETING = 'bucketing'
+PRIORITIZATION = 'prioritization'
 
 ACTIVITY_CHOICES = (
-    (BRAINSTORM, "Brainstorm Activity"),
-    (FORCED_RANK, "Forced Rank Activity"),
-    (GROUPING, "Grouping Activity"),
-    (BUCKETING, "Bucketing Activity"),
-    (PRIORITIZATION, "Prioritization Activity"),
+    (BRAINSTORM, "Brainstorm"),
+    (FORCED_RANK, "Forced Rank"),
+    (GROUPING, "Grouping"),
+    (BUCKETING, "Bucketing"),
+    (PRIORITIZATION, "Prioritization"),
 )
 
 
@@ -78,7 +78,7 @@ class MeetingStructure(TimeStampAbstractMixin):
 
 class Component(TimeStampAbstractMixin):
     name = models.CharField(max_length=255)
-    acitvity_type = models.CharField(choices=ACTIVITY_CHOICES, max_length=100)
+    activity_type = models.CharField(choices=ACTIVITY_CHOICES, max_length=100)
     description = models.TextField(blank=True, null=True)
     meeting_template = models.ForeignKey(MeetingTemplate, on_delete=models.CASCADE)
     agenda_item =  models.CharField(max_length=255)

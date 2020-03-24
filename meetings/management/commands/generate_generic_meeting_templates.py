@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function
 from datetime import timedelta
 from django.core.management.base import BaseCommand
 from bridge.time_helper import TimeHelper
+from activity.models import ActivityBase
 from meetings.models import MeetingTemplate, Component, ACTIVITY_CHOICES
 from meetings.meeting_creation_helper import create_meeting_template_components
 from users.models import GenericUser
@@ -17,6 +18,7 @@ class Command(BaseCommand):
         baseline_component_names = ['Brainstorm', 'Forced Rank', 'Grouping', 'Bucketing', 'Prioritization']
         baseline_component_descriptions = ['Brainstorming for groups', 'Forced Ranking for groups', 'Grouping for groups', 'Bucketing for groups', 'Prioritization for groups']
         hosts = GenericUser.objects.all()
+        participants = GenericUser.objects.all().values()
         for host in hosts:
             selected_components = []
             for name, description, activity_choice in zip(baseline_component_names, baseline_component_descriptions, ACTIVITY_CHOICES):
@@ -35,5 +37,10 @@ class Command(BaseCommand):
             
             # TODO:: ensure this is working properly
             for name,description in zip(baseline_names, baseline_descriptions):
-                create_meeting_template_components(host, name, description, recurring, interval, public, start_date, selected_components)
+                create_meeting_template_components(host, name, description, recurring, interval, public, start_date, selected_components, participants)
+
+            
+            # Backfill data_input w/ brainstorm activity
+            data_input_component = ActivityBase.objects.get(component__activity_type="brainstorm")
+            ActivityBase.objects.all().update(data_input_id=data_input_component.id)
         print('Created baseline meeting templates.')
