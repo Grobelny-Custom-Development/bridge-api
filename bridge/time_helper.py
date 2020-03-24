@@ -16,7 +16,8 @@ class TimeHelper:
 
     @classmethod
     def get_utc_datetime_from_timestamp(cls, timestamp):
-        return datetime.datetime.utcfromtimestamp(timestamp).replace(tzinfo=UTC)
+        return datetime.datetime.utcfromtimestamp(
+            timestamp).replace(tzinfo=UTC)
 
     @classmethod
     def convert_utc_datetime_to_pst(cls, utc_datetime_obj):

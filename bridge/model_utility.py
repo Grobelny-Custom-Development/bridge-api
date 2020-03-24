@@ -12,7 +12,8 @@ class TimeStampAbstractMixin(models.Model):
     TIMESTAMP_FIELDSETS = ('creation_timestamp', 'updated_timestamp',)
     # timestamps
     creation_timestamp = models.DateTimeField(null=True, blank=True)
-    updated_timestamp = models.DateTimeField(null=True, blank=True, db_index=True)
+    updated_timestamp = models.DateTimeField(
+        null=True, blank=True, db_index=True)
 
     class Meta:
         abstract = True
@@ -21,7 +22,8 @@ class TimeStampAbstractMixin(models.Model):
         # get now as UTC
         utc_now = TimeHelper.get_utc_now_datetime()
 
-        # if we have never been saved, then set the creation_timestamp to now(UTC)
+        # if we have never been saved, then set the creation_timestamp to
+        # now(UTC)
         if not self.creation_timestamp:
             self.creation_timestamp = utc_now
 

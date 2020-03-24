@@ -22,5 +22,5 @@ urlpatterns = [
     url(r'^meetings/', include('meetings.urls', namespace='meetings')),
     url(r'^activity/', include('activity.urls', namespace='activity')),
 
-    url(r'^api-auth/', include('rest_framework.urls',namespace='rest_framework'))
+    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))
 ]

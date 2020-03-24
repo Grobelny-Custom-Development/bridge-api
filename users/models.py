@@ -39,10 +39,13 @@ class GenericUserManager(BaseUserManager):
         user.is_admin = True
         user.save(using=self._db)
         return user
+
+
 class AbstractGenericUser(AbstractBaseUser, TimeStampAbstractMixin):
 
     class Meta:
         abstract = True
+
 
 class GenericUser(AbstractGenericUser):
     USERNAME_FIELD = 'email'
@@ -54,8 +57,7 @@ class GenericUser(AbstractGenericUser):
     middle_name = models.CharField(max_length=40, null=True)
     last_name = models.CharField(max_length=40)
     date_of_birth = models.DateTimeField(null=True, blank=True)
-    gender = models.CharField(max_length=2,null=True, blank=True)
-
+    gender = models.CharField(max_length=2, null=True, blank=True)
 
     # used to denote whether this is someone who can acces ORM directly
     # both are needed by django
@@ -64,19 +66,19 @@ class GenericUser(AbstractGenericUser):
 
     # if need to deactivate specific accounts
     is_active = models.BooleanField(default=True, blank=True)
-    
+
     # could be used for 2FA at some point, useful to collect
     phone_number = models.CharField(max_length=10, null=True)
     # use for external applications/more secure identifier
     user_uuid = models.UUIDField(default=uuid4, editable=False)
     # TODO:: discuss delete policy here but would assume users stay intact
     company = models.ForeignKey('Company',
-                                    models.SET_NULL,
-                                    blank=True,
-                                    null=True,)
+                                models.SET_NULL,
+                                blank=True,
+                                null=True,)
 
     objects = GenericUserManager()
-    
+
     def get_short_name(self):
         # Return user's primary identifier
         return self.email
@@ -98,11 +100,12 @@ class Company(TimeStampAbstractMixin):
     effective_start = models.DateTimeField(null=True, blank=True)
     # date that company stopped using bridge
     effective_end = models.DateTimeField(null=True, blank=True)
-    # external uuid 
+    # external uuid
     company_uuid = models.UUIDField(default=uuid4, editable=False)
 
     def save(self, *args, **kwargs):
-        # if we haven't set the uuid then set it now as long as it's not already in the table
+        # if we haven't set the uuid then set it now as long as it's not
+        # already in the table
         if not self.company_uuid:
             uuid = uuid4()
             while Company.objects.filter(company_uuid=uuid).exists():
@@ -110,4 +113,3 @@ class Company(TimeStampAbstractMixin):
 
             self.uuid = uuid
         super(Company, self).save(*args, **kwargs)
-

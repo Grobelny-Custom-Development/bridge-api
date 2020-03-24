@@ -43,8 +43,10 @@ class LogoutView(APIView):
 
 class RegistrationView(APIView):
     permission_classes = (permissions.AllowAny,)
+
     def post(self, request):
-        # TODO:: figure out how company fits in here - potentially url/subdomain
+        # TODO:: figure out how company fits in here - potentially
+        # url/subdomain
         email = request.POST.get('email')
         password = request.POST.get('password')
         first_name = request.POST.get('first_name')
@@ -81,7 +83,7 @@ class UserRoute(APIView):
         """
         Determine the current user by their token, and return their data
         """
-        
+
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
 

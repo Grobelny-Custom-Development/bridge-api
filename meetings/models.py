@@ -46,7 +46,8 @@ class MeetingTemplate(TimeStampAbstractMixin):
     template_uuid = models.UUIDField(default=uuid4, editable=False)
 
     def save(self, *args, **kwargs):
-        # if we haven't set the uuid then set it now as long as it's not already in the table
+        # if we haven't set the uuid then set it now as long as it's not
+        # already in the table
         if not self.template_uuid:
             uuid = uuid4()
             while MeetingTemplate.objects.filter(template_uuid=uuid).exists():
@@ -57,17 +58,20 @@ class MeetingTemplate(TimeStampAbstractMixin):
 
     # TODO:: declare duration field that will sum component duration
 
+
 class MeetingStructure(TimeStampAbstractMixin):
     start_date = models.DateTimeField(blank=True, null=True)
     end_date = models.DateTimeField(blank=True, null=True)
-    meeting_template = models.ForeignKey(MeetingTemplate, related_name='meeting_template')
+    meeting_template = models.ForeignKey(
+        MeetingTemplate, related_name='meeting_template')
     meeting_uuid = models.UUIDField(default=uuid4, editable=False)
     host = models.ForeignKey(GenericUser, related_name='host')
     company_id = models.PositiveIntegerField()
     participants = models.ManyToManyField(GenericUser)
 
     def save(self, *args, **kwargs):
-        # if we haven't set the uuid then set it now as long as it's not already in the table
+        # if we haven't set the uuid then set it now as long as it's not
+        # already in the table
         if not self.meeting_uuid:
             uuid = uuid4()
             while MeetingStructure.objects.filter(meeting_uuid=uuid).exists():
@@ -76,10 +80,12 @@ class MeetingStructure(TimeStampAbstractMixin):
             self.uuid = uuid
         super(MeetingStructure, self).save(*args, **kwargs)
 
+
 class Component(TimeStampAbstractMixin):
     name = models.CharField(max_length=255)
     activity_type = models.CharField(choices=ACTIVITY_CHOICES, max_length=100)
     description = models.TextField(blank=True, null=True)
-    meeting_template = models.ForeignKey(MeetingTemplate, on_delete=models.CASCADE)
-    agenda_item =  models.CharField(max_length=255)
+    meeting_template = models.ForeignKey(
+        MeetingTemplate, on_delete=models.CASCADE)
+    agenda_item = models.CharField(max_length=255)
     duration = models.DurationField()

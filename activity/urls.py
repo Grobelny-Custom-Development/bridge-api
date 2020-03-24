@@ -6,5 +6,5 @@ from activity.views import (
 )
 
 urlpatterns = [
-    url(r'^bucketing/',BucketingRoute.as_view({'get' : 'get_buckets', 'post': 'post'})),
+    url(r'^bucketing/', BucketingRoute.as_view({'get': 'get_buckets', 'post': 'post'})),
 ]

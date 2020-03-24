@@ -53,7 +53,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     # needed for React
-    'corsheaders.middleware.CorsMiddleware', 
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
 
     'django.middleware.security.SecurityMiddleware',
@@ -113,7 +113,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'bridge.wsgi.application'
 
 
-
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
 
@@ -155,7 +154,7 @@ STATIC_URL = '/static/'
 
 AUTH_USER_MODEL = 'users.GenericUser'
 
-#TODO:: change this when going to AWS
+# TODO:: change this when going to AWS
 DATABASES = {'default': dj_database_url.config(conn_max_age=600)}
 DATABASES['default']['ENGINE'] = 'django.db.backends.postgresql'
 
